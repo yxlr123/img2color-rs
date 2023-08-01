@@ -24,8 +24,8 @@
 
 ``` json
 {
-err: null,
-rgb: "#BC695A"
+    err: null,
+    rgb: "#BC695A"
 }
 ```
 

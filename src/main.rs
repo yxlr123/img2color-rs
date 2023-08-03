@@ -1,13 +1,14 @@
 use std::collections::HashMap;
-use std::{io,env};
+use std::{env, io};
 
 use axum::{extract::Query, http::StatusCode, routing::get, Json, Router};
+use dotenv::dotenv;
 use hyper::{Body, Client, Request, Uri};
 use hyper_tls::HttpsConnector;
-use image::{io::Reader as ImageReader, DynamicImage, GenericImageView};
-use palette::LinSrgb;
+use image::GenericImageView;
+use image::{io::Reader as ImageReader, DynamicImage,imageops::FilterType};
 use serde::Serialize;
-use dotenv::dotenv;
+use palette::LinSrgb;
 
 #[derive(Serialize, Debug)]
 struct Img {
@@ -65,15 +66,20 @@ async fn main() {
     let app = Router::new().route("/api", get(api));
 
     // run it with hyper
-    let host = format!("0.0.0.0:{}",match env::var("PORT") {
-        Ok(s) => {
-            if s.is_empty() {
-                "3000".to_string()
-            } else {s}
-        },
-        Err(_e) => "3000".to_string()
-    });
-    println!("服务将会运行在 {}",host);
+    let host = format!(
+        "0.0.0.0:{}",
+        match env::var("PORT") {
+            Ok(s) => {
+                if s.is_empty() {
+                    "3000".to_string()
+                } else {
+                    s
+                }
+            }
+            Err(_e) => "3000".to_string(),
+        }
+    );
+    println!("服务将会运行在 {}", host);
     axum::Server::bind(&host.parse().unwrap())
         .serve(app.into_make_service())
         .await
@@ -116,15 +122,15 @@ async fn api(Query(img): Query<HashMap<String, String>>) -> (StatusCode, Json<Im
     };
     let r = Img {
         err: None,
-        rgb: get_theme_color(img).await,
+        rgb: get_theme_color(&img).await,
     };
     (StatusCode::OK, Json(r))
 }
 
-async fn get_theme_color(img: DynamicImage) -> String {
+async fn get_theme_color(img: &DynamicImage) -> String {
+    let img= img.resize(50, (img.height()*50)/img.width(), FilterType::Lanczos3);
     // Get the image dimensions
     let (width, height) = img.dimensions();
-
     // Calculate the average color of the image
     let mut sum_red: u32 = 0;
     let mut sum_green: u32 = 0;

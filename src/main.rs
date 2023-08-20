@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::{env, io};
-use std::thread;
-use std::sync::{Arc, Mutex};
+
+
 
 use axum::{extract::Query, http::StatusCode, routing::get, Json, Router};
 use dotenv::dotenv;
@@ -11,7 +11,7 @@ use image::GenericImageView;
 use image::{io::Reader as ImageReader, DynamicImage,imageops::FilterType};
 use serde::Serialize;
 use palette::LinSrgb;
-use num_cpus;
+
 
 #[derive(Serialize, Debug)]
 struct Img {
